@@ -55,27 +55,46 @@ public class MainActivity extends AppCompatActivity {
 
     private String addOperator(String input, String oper) {
         if (input.equals("")) {
-            return "";
-        } else {
-            String last = "";
-            last = input.substring(input.length()-1);
-            String textSub = "";
-            if (oper.equals(".")) {
-                if (last.matches("[-/*+]$")) {
-                    textSub = input.substring(0, input.length() - 1);
-                } else {
-                    textSub = input;
-                }
-                textSub = textSub.replaceAll("[0-9]+$", "");
+            if (oper.equals("-")) { return "-"; } else if (oper.equals(".")) { return "0."; } else { return ""; }
+        } else if (input.length() == 1) {
+            if (input.matches("[0-9A-Za-z]")) {
+                return input + oper;
+            } else if (oper.equals(".") && input.matches("[-+/*.]$")) {
+                if (input.equals("-")) { return "-0."; } else { return "0."; }
+            } else if (input.equals("-")) {
+                if (oper.equals("+")) { return ""; } else { return "-"; }
+            } else {
+                return oper;
             }
-            if (!oper.equals(".") || textSub.equals("") || !textSub.substring(textSub.length() - 1).equals(".")) {
-                if (last.matches("[-/*+.]$")) {
-                    return input.substring(0, input.length() - 1) + oper;
+        } else {
+            String last = input.substring(input.length()-1);
+            if (last.matches("[0-9A-Za-z]")) {
+                String numTrim = input.replaceAll("[0-9A-Za-z]+$", "");
+                if (!numTrim.equals("") && numTrim.substring(numTrim.length() - 1).equals(".") && oper.equals(".")) {
+                    return input;
                 } else {
                     return input + oper;
                 }
+            } else if (last.matches("[/*]") && oper.equals("-")) {
+                return input + oper;
             } else {
-                return input;
+                String noLast = input.substring(0, input.length() - 1);
+                if (oper.equals(".")) {
+                    String trimNum = noLast.replaceAll("[0-9A-Za-z]+$", "");
+                    if (!trimNum.equals("") && trimNum.substring(trimNum.length() - 1).equals(".")) {
+                        return input;
+                    } else if (last.equals("-")) {
+                        return input + "0.";
+                    } else {
+                        return noLast + ".";
+                    }
+                } else {
+                    if (noLast.substring(noLast.length()-1).matches("[/*]")) {
+                        return input;
+                    } else {
+                        return noLast + oper;
+                    }
+                }
             }
         }
     }
@@ -231,8 +250,11 @@ public class MainActivity extends AppCompatActivity {
                 if (!text.equals("")) {
                     text = text.substring(0, text.length()-1);
                     disInput.setText(text);
-                    String last = text.substring(text.length()-1);
-                    if (!last.matches("[-/*+]$")) {
+                    String last = "";
+                    if (!text.equals("")) {
+                        last = text.substring(text.length()-1);
+                    }
+                    if (text.equals("") || !last.matches("[-/*+]$")) {
                         calculateOutput();
                     }
                 }
@@ -258,11 +280,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String text = disInput.getText()+"";
-                if (!text.equals("")) {
+                if (text.equals("")) {
+                    disInput.setText(MS);
+                    calculateOutput();
+                } else {
                     String last = text.substring(text.length()-1);
-                    if (last.matches("[-/*+]$") && !MS.equals("")) {
-                        disInput.setText(text + MS);
-                        calculateOutput();
+                    if (!MS.equals("")) {
+                        if ((MS.charAt(0)+"").equals("-")) {
+                            if (last.equals("-")) {
+                                text = text.substring(0, text.length()-1);
+                                disInput.setText(text + "+" + MS.substring(1));
+                            } else if (last.matches("[+.]")) {
+                                text = text.substring(0, text.length()-1);
+                                disInput.setText(text + MS);
+                            } else {
+                                disInput.setText(text + MS);
+                            }
+                            calculateOutput();
+                        } else if (last.matches("[-+/*]")) {
+                            disInput.setText(text + MS);
+                            calculateOutput();
+                        }
                     }
                 }
             }
