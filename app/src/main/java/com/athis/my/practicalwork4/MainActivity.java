@@ -1,5 +1,6 @@
 package com.athis.my.practicalwork4;
 
+import android.annotation.SuppressLint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -57,9 +58,7 @@ public class MainActivity extends AppCompatActivity {
             return "";
         } else {
             String last = "";
-            if (!input.equals("")) {
-                last = input.substring(input.length()-1);
-            }
+            last = input.substring(input.length()-1);
             String textSub = "";
             if (oper.equals(".")) {
                 if (last.matches("[-/*+]$")) {
